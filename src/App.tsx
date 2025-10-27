@@ -1,0 +1,508 @@
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { Header } from './components/Header';
+import { ImageUploader } from './components/ImageUploader';
+import { ResultDisplay } from './components/ResultDisplay';
+import { Loader } from './components/Loader';
+import { Footer } from './components/Footer';
+import { LandingPage } from './components/LandingPage';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { SparklesIcon } from './components/Icons';
+import { ImageComparison } from './components/ImageComparison';
+import { StylePresets } from './components/StylePresets';
+import { GenerationHistory } from './components/GenerationHistory';
+import { KeyboardShortcuts } from './components/KeyboardShortcuts';
+import { ToastContainer } from './components/Toast';
+import { redesignRoom } from './services/geminiServices';
+import { APIError } from './utils/apiUtils';
+import { useAuth } from './context/AuthContext';
+import { saveGeneration } from './services/userData';
+import { useToast } from './hooks/useToast';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+
+type Theme = 'light' | 'dark';
+
+const getInitialTheme = (): Theme => {
+  if (typeof window !== 'undefined') {
+    const savedTheme = localStorage.getItem('theme') as Theme | null;
+    if (savedTheme) {
+      return savedTheme;
+    }
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      return 'dark';
+    }
+  }
+  return 'light';
+};
+
+
+const App: React.FC = () => {
+  const [isLandingPage, setIsLandingPage] = useState(true);
+  const [originalImage, setOriginalImage] = useState<string | null>(null);
+  const [originalImageFile, setOriginalImageFile] = useState<File | null>(null);
+  const [prompt, setPrompt] = useState<string>('');
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+  const [authError, setAuthError] = useState<string>('');
+  const [theme, setTheme] = useState<Theme>(getInitialTheme);
+  const [generationProgress, setGenerationProgress] = useState<number>(0);
+  const [retryCount, setRetryCount] = useState<number>(0);
+  const [showComparison, setShowComparison] = useState<boolean>(false);
+  const [showHistory, setShowHistory] = useState<boolean>(false);
+  const [showShortcuts, setShowShortcuts] = useState<boolean>(false);
+  const { 
+    user, 
+    loading: authLoading, 
+    error: authContextError,
+    signInWithGoogle, 
+    signInWithEmail,
+    signUpWithEmail,
+    signOutUser,
+    clearError,
+  } = useAuth();
+  const { toasts, removeToast, success, error: showError, info } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!user) {
+      setIsLandingPage(true);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user && isLandingPage) {
+      setIsLandingPage(false);
+    }
+  }, [user, isLandingPage]);
+
+  // Clear auth errors when they occur
+  useEffect(() => {
+    if (authContextError) {
+      setAuthError(authContextError);
+    }
+  }, [authContextError]);
+
+  const handleGoogleSignIn = useCallback(async () => {
+    clearError();
+    setAuthError('');
+    const credential = await signInWithGoogle();
+    if (credential) {
+      success('Successfully signed in with Google!');
+    }
+  }, [signInWithGoogle, clearError, success]);
+
+  const handleEmailSignIn = useCallback(async (email: string, password: string) => {
+    clearError();
+    setAuthError('');
+    const credential = await signInWithEmail(email, password);
+    if (credential) {
+      success('Successfully signed in!');
+    }
+  }, [signInWithEmail, clearError, success]);
+
+  const handleEmailSignUp = useCallback(async (email: string, password: string, name: string) => {
+    clearError();
+    setAuthError('');
+    const credential = await signUpWithEmail(email, password, name);
+    if (credential) {
+      success('Account created successfully!');
+    }
+  }, [signUpWithEmail, clearError, success]);
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = useCallback(() => {
+    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+    info(`Switched to ${theme === 'light' ? 'dark' : 'light'} mode`);
+  }, [theme, info]);
+
+  const handleImageChange = useCallback((file: File | null) => {
+    if (file) {
+      setGeneratedImage(null);
+      setError('');
+      setOriginalImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setOriginalImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  }, []);
+
+  const handleGenerate = async () => {
+    if (!user) {
+      setError('Please sign in to generate room designs.');
+      return;
+    }
+
+    if (!originalImageFile || !prompt.trim()) {
+      setError('Please upload an image and enter a design prompt.');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+    setGeneratedImage(null);
+    setGenerationProgress(0);
+    setRetryCount(0);
+
+    try {
+      const base64Image = originalImage?.split(',')[1];
+      if (!base64Image) {
+        throw new Error("Could not read the uploaded image.");
+      }
+
+      // Simulate progress updates
+      const progressInterval = setInterval(() => {
+        setGenerationProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return prev;
+          }
+          return prev + Math.random() * 10;
+        });
+      }, 1000);
+
+      const resultBase64 = await redesignRoom(
+        base64Image,
+        originalImageFile.type,
+        prompt
+      );
+      
+      clearInterval(progressInterval);
+      setGenerationProgress(100);
+      setGeneratedImage(`data:image/jpeg;base64,${resultBase64}`);
+      success('Design generated successfully! ✨');
+
+      if (user) {
+        try {
+          await saveGeneration(user.uid, {
+            prompt,
+            generatedImageBase64: resultBase64,
+            generatedImageMimeType: 'image/jpeg',
+            originalImageDataUrl: originalImage,
+            originalImageMimeType: originalImageFile.type,
+          });
+          info('Design saved to your history');
+        } catch (storageError) {
+          console.error('Failed to store generation history:', storageError);
+          showError('Failed to save to history');
+        }
+      }
+      
+      // Clear progress after a delay
+      setTimeout(() => setGenerationProgress(0), 1000);
+    } catch (e: unknown) {
+      let errorMessage = 'An unexpected error occurred.';
+      
+      if (e instanceof APIError) {
+        errorMessage = e.message;
+        
+        if (e.code === 'RATE_LIMIT_EXCEEDED') {
+          setRetryCount(prev => prev + 1);
+        }
+      } else if (e instanceof Error) {
+        errorMessage = e.message;
+      }
+      
+      setError(errorMessage);
+      showError(errorMessage);
+      console.error('Generation error:', e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const handlePromptSuggestion = (suggestion: string) => {
+    setPrompt(suggestion);
+    info('Prompt suggestion applied');
+  };
+
+  const handleDownloadGenerated = () => {
+    if (generatedImage) {
+      success('Downloading your design...');
+    }
+  };
+
+  const triggerFileUpload = () => {
+    fileInputRef.current?.click();
+  };
+  
+  const handleRetry = () => {
+    handleGenerate();
+  };
+  
+  const handleGetStarted = () => {
+    setIsLandingPage(false);
+  };
+
+  const handleGoHome = () => {
+    setIsLandingPage(true);
+    // Clear state when going home
+    setOriginalImage(null);
+    setOriginalImageFile(null);
+    setGeneratedImage(null);
+    setPrompt('');
+    setError('');
+    setGenerationProgress(0);
+    setRetryCount(0);
+  };
+
+  const promptSuggestions = useMemo(() => [
+    "Transform into a minimalist Scandinavian bedroom with white oak furniture and natural light",
+    "Create a cozy rustic cabin living room with stone fireplace and warm wood tones",
+    "Redesign as a modern home office with built-in shelving and ergonomic workspace",
+    "Convert to a vibrant mid-century modern lounge with bold colors and geometric patterns",
+    "Add bohemian flair with macrame, plants, and warm earth tone textiles",
+    "Make it an elegant contemporary space with marble accents and luxury finishes",
+  ], []);
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    onUpload: triggerFileUpload,
+    onGenerate: () => {
+      if (originalImage && prompt.trim() && user && !isLoading) {
+        handleGenerate();
+      }
+    },
+    onDownload: handleDownloadGenerated,
+    onHistory: () => {
+      if (user && !isLandingPage) {
+        setShowHistory(true);
+      }
+    },
+    onToggleShortcuts: () => setShowShortcuts((prev) => !prev),
+    onEscape: () => {
+      setShowHistory(false);
+      setShowShortcuts(false);
+    },
+    onToggleTheme: toggleTheme,
+  });
+
+  return (
+    <ErrorBoundary>
+      <div className="relative min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-primary-50/20 to-accent-50/20 dark:bg-gradient-to-br dark:from-dark-bg dark:via-dark-surface dark:to-dark-bg text-slate-800 dark:text-slate-200 transition-colors duration-500">
+        <ToastContainer toasts={toasts} removeToast={removeToast} />
+        
+        {showHistory && user && (
+          <GenerationHistory
+            userId={user.uid}
+            onSelectGeneration={(gen) => {
+              setPrompt(gen.prompt);
+              setGeneratedImage(gen.generatedImageUrl);
+              if (gen.originalImageUrl) {
+                setOriginalImage(gen.originalImageUrl);
+              }
+              setShowHistory(false);
+              success('Design loaded from history');
+            }}
+            onClose={() => setShowHistory(false)}
+          />
+        )}
+
+        {showShortcuts && (
+          <KeyboardShortcuts onClose={() => setShowShortcuts(false)} />
+        )}
+
+        {isLoading && (
+          <Loader 
+            progress={generationProgress > 0 ? generationProgress : undefined}
+            message="Designing your room..."
+            subMessage={retryCount > 0 ? `Attempt ${retryCount + 1}` : "This can take a moment."}
+          />
+        )}
+        
+        <Header 
+          onGoHome={handleGoHome} 
+          theme={theme} 
+          toggleTheme={toggleTheme} 
+          isLandingPage={isLandingPage} 
+          user={user}
+          onSignIn={handleGoogleSignIn}
+          onSignOut={signOutUser}
+          authLoading={authLoading}
+          onShowHistory={() => setShowHistory(true)}
+          onShowShortcuts={() => setShowShortcuts(true)}
+        />
+        
+        <main className="flex-grow container mx-auto px-4 py-8 md:py-12 relative z-0">
+          {isLandingPage ? (
+            <LandingPage 
+              onGetStarted={handleGetStarted} 
+              isAuthenticated={Boolean(user)}
+              onGoogleSignIn={handleGoogleSignIn}
+              onEmailSignIn={handleEmailSignIn}
+              onEmailSignUp={handleEmailSignUp}
+              authLoading={authLoading}
+              authError={authError}
+            />
+          ) : (
+            <div className="max-w-6xl mx-auto space-y-8 pt-8 animate-fade-in">
+              {/* Style Presets */}
+              <StylePresets
+                onSelectStyle={(preset) => {
+                  setPrompt(preset.prompt);
+                  success(`${preset.name} style selected`);
+                }}
+              />
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+                <div className="w-full space-y-6">
+                  <ImageUploader 
+                    onImageChange={handleImageChange} 
+                    imagePreviewUrl={originalImage}
+                    isProcessing={isLoading}
+                  />
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    className="hidden"
+                    accept="image/png, image/jpeg, image/webp"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleImageChange(file);
+                      }
+                    }}
+                  />
+                
+                <div className="space-y-4">
+                  <label htmlFor="prompt" className="block text-lg font-medium text-slate-900 dark:text-slate-200">
+                    2. Describe Your Vision
+                  </label>
+                  <textarea
+                    id="prompt"
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    placeholder="e.g., 'Transform this into a minimalist Scandinavian bedroom with white oak furniture, plenty of natural light, and cozy textiles...'"
+                    className="input-field h-32 resize-none"
+                    rows={4}
+                    disabled={isLoading}
+                    maxLength={500}
+                  />
+                  <div className="flex justify-between items-center text-xs text-slate-400 dark:text-slate-500">
+                    <span>Be specific about colors, materials, and style</span>
+                    <span>{prompt.length}/500</span>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Or try a suggestion:</p>
+                  <div className="grid grid-cols-1 gap-2">
+                    {promptSuggestions.map((suggestion, index) => (
+                       <button 
+                         key={index} 
+                         onClick={() => handlePromptSuggestion(suggestion)} 
+                         className="text-left text-sm bg-white/60 hover:bg-white/80 text-slate-700 dark:bg-slate-800/60 dark:hover:bg-slate-700/80 dark:text-slate-300 p-3 rounded-xl transition-all duration-300 border border-slate-200/50 hover:border-accent-300 dark:border-slate-700/50 dark:hover:border-accent-600 hover:shadow-md hover:scale-[1.02] backdrop-blur-sm"
+                         disabled={isLoading}
+                       >
+                         {suggestion}
+                       </button>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleGenerate}
+                  disabled={isLoading || !originalImage || !prompt.trim() || !user}
+                  className="btn-primary w-full flex items-center justify-center gap-2 py-4 text-lg font-bold shadow-lg hover:shadow-glow-lg"
+                >
+                  <SparklesIcon className="w-6 h-6" />
+                  {isLoading ? 'Generating Magic...' : 'Generate Design ✨'}
+                </button>
+                {!user && (
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    Sign in with Google to generate and save your room designs.
+                  </p>
+                )}
+                
+                {error && (
+                  <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl p-4 backdrop-blur-sm">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0">
+                        <svg className="w-5 h-5 text-red-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-red-900 dark:text-red-100 mb-1">Generation Error</h4>
+                        <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
+                        {!isLoading && (
+                          <button
+                            onClick={handleRetry}
+                            className="mt-3 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium underline transition-colors"
+                          >
+                            Try Again
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="w-full space-y-6">
+                {/* Comparison Toggle */}
+                {originalImage && generatedImage && (
+                  <div className="flex items-center justify-between p-4 bg-white/60 dark:bg-slate-800/60 rounded-xl border border-slate-200/50 dark:border-slate-700/50 backdrop-blur-sm shadow-md">
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                      View Mode
+                    </span>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setShowComparison(false)}
+                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
+                          !showComparison
+                            ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-md'
+                            : 'bg-slate-200/80 dark:bg-slate-700/80 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
+                        }`}
+                      >
+                        Side by Side
+                      </button>
+                      <button
+                        onClick={() => setShowComparison(true)}
+                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
+                          showComparison
+                            ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-md'
+                            : 'bg-slate-200/80 dark:bg-slate-700/80 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
+                        }`}
+                      >
+                        Comparison Slider
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Result Display */}
+                {showComparison && originalImage && generatedImage ? (
+                  <ImageComparison
+                    originalImage={originalImage}
+                    generatedImage={generatedImage}
+                  />
+                ) : (
+                  <ResultDisplay 
+                    originalImage={originalImage} 
+                    generatedImage={generatedImage}
+                    onRetry={handleRetry}
+                  />
+                )}
+              </div>
+            </div>
+            </div>
+          )}
+        </main>
+        
+        <Footer />
+      </div>
+    </ErrorBoundary>
+  );
+};
+
+export default App;

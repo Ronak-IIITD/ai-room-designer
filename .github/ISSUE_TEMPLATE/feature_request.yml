@@ -1,0 +1,164 @@
+name: Feature Request
+description: Suggest a new feature or enhancement
+title: "[Feature]: "
+labels: ["enhancement", "feature-request"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a new feature! 🚀
+        
+        Your ideas help make AI Room Designer better for everyone.
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Pre-flight Checklist
+      description: Please confirm the following before submitting
+      options:
+        - label: I have searched existing issues and feature requests
+          required: true
+        - label: This feature doesn't exist in the current version
+          required: true
+        - label: I have considered if this could be solved with existing features
+          required: true
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Feature Description
+      description: A clear and concise description of what you want to happen
+      placeholder: Describe the feature you'd like to see
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem-statement
+    attributes:
+      label: Problem Statement
+      description: What problem does this feature solve?
+      placeholder: "I'm always frustrated when... / It would be helpful if... / Users need..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the solution you'd like in detail
+      placeholder: |
+        How should this feature work?
+        - User workflow
+        - UI/UX considerations
+        - Technical approach (if you have ideas)
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Solutions
+      description: Describe any alternative solutions or features you've considered
+      placeholder: What other approaches could solve this problem?
+
+  - type: dropdown
+    id: feature-category
+    attributes:
+      label: Feature Category
+      description: Which area of the application does this relate to?
+      options:
+        - Image Upload & Processing
+        - AI Generation & Prompts
+        - User Interface & Experience
+        - Performance & Speed
+        - Sharing & Export
+        - Themes & Customization
+        - Analytics & Insights
+        - Mobile Experience
+        - Accessibility
+        - Developer Tools
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority Level
+      description: How important is this feature to you?
+      options:
+        - Critical - Blocking my usage
+        - High - Significantly improves experience
+        - Medium - Nice to have enhancement
+        - Low - Minor convenience feature
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-cases
+    attributes:
+      label: Use Cases
+      description: Provide specific examples of how this feature would be used
+      placeholder: |
+        Example scenarios:
+        1. When a user wants to...
+        2. For interior designers who need to...
+        3. To help with...
+
+  - type: textarea
+    id: success-criteria
+    attributes:
+      label: Success Criteria
+      description: How would we know this feature is successful?
+      placeholder: |
+        This feature would be successful if:
+        - Users can easily...
+        - The workflow becomes...
+        - Performance improves by...
+
+  - type: checkboxes
+    id: complexity
+    attributes:
+      label: Implementation Complexity (if known)
+      description: What do you think the complexity might be?
+      options:
+        - label: Simple UI change
+        - label: New component or page
+        - label: Backend/API changes needed
+        - label: Third-party integration required
+        - label: AI/ML enhancements needed
+        - label: Significant architecture changes
+
+  - type: textarea
+    id: mockups
+    attributes:
+      label: Mockups or Examples
+      description: Include any mockups, screenshots, or examples from other applications
+      placeholder: |
+        Drag and drop images here or provide links to:
+        - Mockups or wireframes
+        - Screenshots from other apps
+        - Reference implementations
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Add any other context or information about the feature request
+      placeholder: |
+        - Related features or dependencies
+        - Technical considerations
+        - User research or feedback
+        - Business impact
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      description: Are you interested in contributing to this feature?
+      options:
+        - label: I'd like to help implement this feature
+        - label: I can provide design/UX input
+        - label: I can help with testing
+        - label: I can provide user feedback during development
