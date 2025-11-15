@@ -14,7 +14,6 @@
     "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,css,md,json}\""
   },
   "dependencies": {
-    "@google/genai": "^1.21.0",
     "firebase": "^12.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
@@ -28,6 +27,8 @@
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.16",
     "eslint": "^8.45.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
     "postcss": "^8.4.32",

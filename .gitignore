@@ -102,3 +102,4 @@ testsprite_tests/
 *.vsix
 CachedExtensionVSIXs/
 .aider*
+.env

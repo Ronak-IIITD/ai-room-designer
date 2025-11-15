@@ -1,0 +1,43 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user owns the resource
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Helper function to validate image file
+    function isValidImage() {
+      return request.resource.size < 10 * 1024 * 1024 && // Max 10MB
+             request.resource.contentType.matches('image/.*'); // Must be an image
+    }
+    
+    // User generation images (both original and generated)
+    match /users/{userId}/generations/{generationId}/{imageType} {
+      // imageType can be 'original' or 'generated'
+      
+      // Users can only read their own images
+      allow read: if isOwner(userId);
+      
+      // Users can only write their own images with valid file types and sizes
+      allow write: if isOwner(userId) && 
+                      isValidImage() &&
+                      (imageType == 'original' || imageType == 'generated');
+      
+      // Users can delete their own images
+      allow delete: if isOwner(userId);
+    }
+    
+    // Deny all other access by default
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

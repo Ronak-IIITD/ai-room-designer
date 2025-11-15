@@ -1,273 +1,255 @@
-# 🏠 AI Room Designer# AI Room Designer
+# 🏠 AI Room Designer
 
+> Transform your living space with the power of AI! Upload a photo of your room and get instant, AI-generated design suggestions.
 
+[![React](https://img.shields.io/badge/React-18.2-blue.svg)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.2-blue.svg)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-5.0-purple.svg)](https://vitejs.dev/)
+[![Firebase](https://img.shields.io/badge/Firebase-12.3-orange.svg)](https://firebase.google.com/)
 
-> Transform your living space with the power of AI! Upload a photo of your room and get instant, AI-generated redesign suggestions.An AI-powered room design tool that uses Google's Gemini AI to transform room photos into new design concepts.
+## ✨ Features
 
-
-
-[![React](https://img.shields.io/badge/React-18.3-blue.svg)](https://reactjs.org/)## Features
-
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
-
-[![Vite](https://img.shields.io/badge/Vite-5.4-purple.svg)](https://vitejs.dev/)- Upload room photos (PNG, JPG, WEBP)
-
-[![Firebase](https://img.shields.io/badge/Firebase-12.3-orange.svg)](https://firebase.google.com/)- Describe your design vision with text prompts
-
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)- AI-generated room redesigns using Gemini AI
-
-- Secure Google sign-in to personalize the experience
-
-## ✨ Features- Automatic storage of redesign history in Firebase
-
-- Dark/light theme toggle
-
-- 🎨 **AI-Powered Design** - Generate stunning room redesigns using advanced AI models- Responsive design with Tailwind CSS
-
-- 📸 **Simple Upload** - Drag & drop or click to upload room photos
-
-- 🔐 **Secure Authentication** - Google Sign-In and Email/Password authentication via Firebase## Setup Instructions
-
-- ⚡ **Lightning Fast** - Built with Vite for optimal performance
-
-- 🌙 **Dark Mode** - Beautiful dark theme for comfortable viewing1. **Clone/Download** the project files
-
+- 🎨 **AI-Powered Design Analysis** - Get detailed room redesign suggestions using Google Gemini AI
+- 📸 **Simple Upload** - Drag & drop or click to upload room photos (PNG, JPG, WEBP)
+- 🔐 **Secure Authentication** - Google Sign-In and Email/Password via Firebase
+- ⚡ **Lightning Fast** - Built with Vite and optimized for performance
+- 🌙 **Dark Mode** - Beautiful dark theme for comfortable viewing
 - 🎯 **Style Presets** - Quick-select from 10+ popular interior design styles
+- 💾 **Smart Caching** - Optimized API usage with intelligent caching
+- 📱 **Responsive** - Works seamlessly on desktop, tablet, and mobile
+- 🔒 **Secure Backend** - All API calls handled server-side via Firebase Functions
+- 🛡️ **Rate Limiting** - Server-side rate limiting to prevent abuse
 
-- 💾 **Smart Caching** - Optimized API usage with intelligent caching2. **Install dependencies:**
+## 🚀 Tech Stack
 
-- 📱 **Responsive** - Works seamlessly on desktop, tablet, and mobile   ```bash
+### Frontend
+- **React 18.2** with TypeScript for type-safe component development
+- **Vite 5.0** for blazing-fast dev server and optimized builds
+- **Tailwind CSS** for utility-first styling
+- **Lucide React** for beautiful icons
 
-   npm install
+### Backend
+- **Firebase Functions** (Node.js 20) for serverless backend
+- **Cloud Firestore** for user data and design history
+- **Firebase Storage** for image storage
+- **Firebase Auth** for secure authentication
 
-## 🚀 Tech Stack   ```
+### AI Integration
+- **OpenRouter API** with Google Gemini 2.0 Flash model
+- Server-side API calls for security
+- Client-side caching for performance
 
+## 📦 Getting Started
 
+### Prerequisites
 
-- **Frontend:** React 18.3, TypeScript, Tailwind CSS3. **Set up environment variables:**
-
-- **Build Tool:** Vite 5.4   
-
-- **Authentication:** Firebase Auth (Google & Email/Password)   Copy `.env.example` to `.env` and fill in the required keys:
-
-- **AI Integration:** OpenRouter API (supports multiple AI models)   
-
-- **Database:** Cloud Firestore   ```bash
-
-- **Storage:** Firebase Cloud Storage   cp .env.example .env
-
-- **Styling:** Tailwind CSS with custom components   ```
-
-- **Icons:** Lucide React   
-
-   Required values:
-
-## 📦 Getting Started   
-
-   - `VITE_API_KEY` — Google Gemini API key (image generation)
-
-### Prerequisites   - `VITE_FIREBASE_*` — Firebase config for Authentication, Firestore, and Storage
-
-
-
-- Node.js 18+ and npm/yarn   Both key sets are needed for login and saving user redesigns.
-
+- Node.js 18+ and npm
 - Firebase account ([Get started](https://firebase.google.com/))
+- OpenRouter API key ([Get API key](https://openrouter.ai/))
 
-- OpenRouter API key ([Get API key](https://openrouter.ai/))4. **Run the development server:**
-
-   ```bash
-
-### Installation   npm run dev
-
-   ```
+### Installation
 
 1. **Clone the repository**
 
-   ```bash5. **Build for production:**
+   ```bash
+   git clone https://github.com/Ronak-IIITD/ai-room-designer.git
+   cd ai-room-designer
+   ```
 
-   git clone https://github.com/Ronak-IIITD/ai-room-designer.git   ```bash
-
-   cd ai-room-designer   npm run build
-
-   ```   ```
-
-
-
-2. **Install dependencies**## Getting a Gemini API Key
+2. **Install dependencies**
 
    ```bash
-
-   npm install1. Go to [Google AI Studio](https://aistudio.google.com/)
-
-   ```2. Sign in with your Google account
-
-3. Create a new API key
-
-3. **Set up environment variables**4. Copy the key and paste it in your `.env` file
-
+   # Install frontend dependencies
+   npm install
    
+   # Install Firebase Functions dependencies
+   cd functions
+   npm install
+   cd ..
+   ```
 
-   Copy `.env.example` to `.env`:## Configuring Firebase
+3. **Set up environment variables**
+
+   Copy `.env.example` to `.env`:
 
    ```bash
+   cp .env.example .env
+   ```
 
-   cp .env.example .env1. Create a Firebase project at [firebase.google.com](https://firebase.google.com/)
+   Edit `.env` with your Firebase credentials:
 
-   ```2. Enable **Authentication → Sign-in method → Google**
-
-3. Provision **Cloud Firestore** (in production mode or locked-down test mode)
-
-   Then edit `.env` with your credentials:4. Enable **Cloud Storage**
-
-   ```env5. Copy the web app credentials (API key, Auth domain, Project ID, etc.) into your `.env`
-
-   # OpenRouter API Key (or other AI provider)
-
-   VITE_API_KEY=your_openrouter_api_key_hereUser redesigns are saved under `users/{uid}/generations` and reference files uploaded to Storage.
-
-   
-
-   # Firebase Configuration## Project Structure
-
+   ```env
+   # Firebase Configuration (get from Firebase Console)
    VITE_FIREBASE_API_KEY=your_firebase_api_key
+   VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+   VITE_FIREBASE_PROJECT_ID=your_project_id
+   VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+   VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+   VITE_FIREBASE_APP_ID=your_app_id
+   ```
 
-   VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com```
+   **Note:** The OpenRouter API key should be set in Firebase Functions config (see deployment guide), NOT in the client .env file.
 
-   VITE_FIREBASE_PROJECT_ID=your_project_idsrc/
+4. **Configure Firebase**
 
-   VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com├── components/          # React components
+   ```bash
+   # Install Firebase CLI
+   npm install -g firebase-tools
+   
+   # Login to Firebase
+   firebase login
+   
+   # Initialize Firebase (select Functions, Firestore, Storage, Hosting)
+   firebase init
+   ```
 
-   VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id│   ├── Header.tsx      # Navigation header
+   In Firebase Console:
+   - Enable Authentication → Google and Email/Password sign-in methods
+   - Create Cloud Firestore database
+   - Enable Cloud Storage
 
-   VITE_FIREBASE_APP_ID=your_app_id│   ├── Footer.tsx      # Footer component
+5. **Set OpenRouter API key for Functions**
 
-   ```│   ├── Icons.tsx       # SVG icon components
+   ```bash
+   firebase functions:config:set openrouter.apikey="YOUR_OPENROUTER_API_KEY"
+   ```
 
-│   ├── ImageUploader.tsx # File upload component
+6. **Deploy Firebase Security Rules and Functions**
 
-4. **Configure Firebase**│   ├── LandingPage.tsx # Landing page component
+   ```bash
+   # Deploy Firestore and Storage security rules
+   firebase deploy --only firestore:rules,storage:rules
+   
+   # Build and deploy Functions
+   cd functions
+   npm run build
+   cd ..
+   firebase deploy --only functions
+   ```
 
-   - Go to [Firebase Console](https://console.firebase.google.com/)│   ├── Loader.tsx      # Loading spinner
+7. **Run development server**
 
-   - Create a new project│   └── ResultDisplay.tsx # Result display component
-
-   - Enable Authentication → Sign-in methods → Enable Google and Email/Password├── context/
-
-   - Enable Cloud Firestore (Database)│   └── AuthContext.tsx   # Google authentication provider
-
-   - Enable Cloud Storage├── services/
-
-   - Copy your config values to `.env`│   ├── firebase.ts       # Firebase initialization
-
-│   ├── geminiServices.tsx # Gemini AI service
-
-5. **Run development server**│   └── userData.ts       # Firestore/Storage persistence helpers
-
-   ```bash├── App.tsx             # Main app component
-
-   npm run dev├── main.tsx           # Entry point
-
-   ```└── vite-env.d.ts      # TypeScript environment types
-
-```
+   ```bash
+   # Start Firebase Emulators (optional but recommended for local dev)
+   firebase emulators:start
+   
+   # In a separate terminal, start frontend dev server
+   npm run dev
+   ```
 
    Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Technologies Used
-
 ## 🔧 Available Scripts
 
-- React 18
+```bash
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run preview      # Preview production build
+npm run lint         # Run ESLint
+npm run lint:fix     # Fix ESLint errors
+npm run format       # Format code with Prettier
+npm run type-check   # Type check without emitting
+```
 
-```bash- TypeScript
+## 🌐 Deployment
 
-npm run dev          # Start development server- Vite
+See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for detailed deployment instructions.
 
-npm run build        # Build for production- Tailwind CSS
+### Quick Deploy to Firebase Hosting
 
-npm run preview      # Preview production build- Google Gemini AI
+```bash
+# Build the frontend
+npm run build
 
-npm run lint         # Run ESLint- Firebase Authentication, Firestore, and Storage
-
-```- React DOM
-
-
-
-## 🌐 Deployment## License
-
-
-
-### Deploy to Vercel (Recommended)All Rights Reserved © 2025 AI Room Designer
-
-1. Push your code to GitHub
-2. Import project on [Vercel](https://vercel.com)
-3. Add environment variables in Vercel dashboard
-4. Deploy!
-
-### Deploy to Netlify
-
-1. Build the project: `npm run build`
-2. Deploy the `dist` folder to Netlify
-3. Configure environment variables in Netlify dashboard
-
-## 🎨 Usage
-
-1. **Sign In** - Use Google Sign-In or create an account with email/password
-2. **Upload Photo** - Click or drag & drop a room photo
-3. **Describe Vision** - Describe your desired design style or select a preset
-4. **Generate** - Click "Generate Design" and wait for AI magic!
-5. **Download** - Save your redesigned room image
+# Deploy everything
+firebase deploy
+```
 
 ## 📁 Project Structure
 
 ```
-src/
-├── components/          # React components
-│   ├── Header.tsx      # App header with theme toggle
-│   ├── Footer.tsx      # Footer component
-│   ├── AuthModal.tsx   # Authentication modal
-│   ├── ImageUploader.tsx # Image upload component
-│   ├── LandingPage.tsx # Main landing page
-│   ├── ResultDisplay.tsx # Result display
-│   └── ...
-├── context/
-│   └── AuthContext.tsx # Firebase auth context
-├── services/
-│   ├── firebase.ts     # Firebase initialization
-│   ├── geminiServices.tsx # AI integration (OpenRouter)
-│   └── userData.ts     # User data management
-├── utils/
-│   ├── apiUtils.ts     # API utilities (caching, retry)
-│   ├── fileUtils.ts    # File handling utilities
-│   └── analytics.ts    # Analytics tracking
-├── App.tsx             # Main app component
-└── main.tsx           # Entry point
+.
+├── src/
+│   ├── components/          # React components
+│   │   ├── Header.tsx      # Navigation header
+│   │   ├── Footer.tsx      # Footer component
+│   │   ├── AuthModal.tsx   # Authentication modal
+│   │   ├── ImageUploader.tsx # File upload component
+│   │   ├── LandingPage.tsx # Landing page
+│   │   └── ResultDisplay.tsx # Result display
+│   ├── context/
+│   │   └── AuthContext.tsx # Firebase auth context
+│   ├── services/
+│   │   ├── firebase.ts     # Firebase initialization
+│   │   ├── geminiServices.tsx # AI service (calls Functions)
+│   │   └── userData.ts     # Firestore data operations
+│   ├── utils/
+│   │   ├── apiUtils.ts     # API utilities (retry, caching)
+│   │   ├── fileUtils.ts    # File handling
+│   │   └── analytics.ts    # Analytics tracking
+│   ├── App.tsx             # Main app component
+│   └── main.tsx           # Entry point
+├── functions/              # Firebase Functions (backend)
+│   ├── src/
+│   │   └── index.ts       # Cloud Functions
+│   ├── package.json
+│   └── tsconfig.json
+├── firestore.rules        # Firestore security rules
+├── storage.rules          # Storage security rules
+├── firebase.json          # Firebase configuration
+├── .env.example           # Environment template
+├── DEPLOYMENT_GUIDE.md    # Deployment instructions
+└── package.json
+
 ```
 
-## 🔒 Security
+## 🎨 Usage
 
-- ⚠️ **Never commit your `.env` file** - It contains sensitive API keys
-- 🔐 All authentication is handled securely through Firebase
-- 🛡️ API keys are validated and rate-limited
-- 🔑 User data is protected with Firebase security rules
-- 📝 The `.gitignore` file is configured to exclude sensitive files
+1. **Sign In** - Use Google Sign-In or create an account with email/password
+2. **Upload Photo** - Click or drag & drop a room photo (max 10MB)
+3. **Describe Vision** - Type your design preferences or select a preset style
+4. **Generate** - Click "Generate Design" and wait for AI suggestions
+5. **Review** - View detailed design recommendations and suggestions
+6. **Save** - Your design history is automatically saved to your account
 
-## 🐛 Known Issues
+## 🔒 Security Features
 
-- Free tier OpenRouter models may have temporary rate limits during high usage
-- Image generation requires valid API credits
+✅ **Firebase Security Rules** - Firestore and Storage protected with user-level access control
+✅ **Server-Side API Calls** - All AI API calls handled by Firebase Functions (API keys never exposed)
+✅ **Rate Limiting** - 10 requests per user per day (configurable)
+✅ **Input Validation** - Server-side input sanitization and validation
+✅ **Authentication Required** - All features require user authentication
+✅ **HTTPS Only** - All traffic encrypted via Firebase Hosting
 
-## 📝 License
+## 🐛 Known Limitations
 
-This project is licensed under the MIT License.
+- **Text-Based Suggestions**: Currently provides design suggestions as text. Integration with actual image generation APIs (Stability AI, DALL-E) is planned.
+- **Rate Limits**: Free tier has 10 requests per user per day
+- **File Size**: Max 10MB per image upload
+
+## 📈 Future Improvements
+
+- [ ] Integrate actual image generation (Stability AI, DALL-E)
+- [ ] Add comprehensive test coverage (Vitest, React Testing Library)
+- [ ] Refactor large components
+- [ ] Add Sentry for error tracking
+- [ ] Implement PWA features for offline support
+- [ ] Add more AI model options
+- [ ] Social sharing features
 
 ## 🤝 Contributing
 
-Contributions are welcome! Feel free to:
-- Report bugs
-- Suggest new features
-- Submit pull requests
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) file for details.
 
 ## 👨‍💻 Author
 
@@ -276,14 +258,18 @@ Contributions are welcome! Feel free to:
 
 ## 🙏 Acknowledgments
 
-- OpenRouter for AI model access
-- Firebase for authentication and storage
-- Google Gemini AI for image generation capabilities
-- Tailwind CSS for beautiful styling
-- React and Vite communities
+- [OpenRouter](https://openrouter.ai/) for AI model access
+- [Firebase](https://firebase.google.com/) for backend infrastructure
+- [Google Gemini AI](https://ai.google.dev/) for AI capabilities
+- [Tailwind CSS](https://tailwindcss.com/) for styling
+- [Vite](https://vitejs.dev/) for build tooling
+- [React](https://react.dev/) community
 
 ---
 
 <div align="center">
   Made with ❤️ by Ronak Anand
+  <br />
+  <br />
+  ⭐ Star this repo if you find it helpful!
 </div>
