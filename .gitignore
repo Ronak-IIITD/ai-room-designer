@@ -101,3 +101,4 @@ testsprite_tests/
 *.ipch
 *.vsix
 CachedExtensionVSIXs/
+.aider*
