@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AuthProvider } from './context/AuthContext';
+import { logger } from './utils/logger';
 import './index.css';
 
 // Performance monitoring
@@ -11,7 +12,7 @@ if (typeof window !== 'undefined') {
   window.addEventListener('load', () => {
     if ('performance' in window) {
       const loadTime = performance.now();
-      console.log(`App loaded in ${loadTime.toFixed(2)}ms`);
+      logger.info(`App loaded in ${loadTime.toFixed(2)}ms`);
     }
   });
 }

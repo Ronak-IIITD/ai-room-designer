@@ -7,29 +7,65 @@ on:
     branches: [ main ]
 
 jobs:
+  # Environment Validation
+  validate-env:
+    name: Validate Environment
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Check required files exist
+      run: |
+        echo "Checking for required configuration files..."
+        test -f .env.example || (echo ".env.example missing" && exit 1)
+        test -f firebase.json || (echo "firebase.json missing" && exit 1)
+        test -f firestore.rules || (echo "firestore.rules missing" && exit 1)
+        test -f storage.rules || (echo "storage.rules missing" && exit 1)
+        echo "✓ All required files present"
+
+    - name: Validate .env.example
+      run: |
+        echo "Validating .env.example has required variables..."
+        grep -q "VITE_FIREBASE_API_KEY" .env.example || (echo "VITE_FIREBASE_API_KEY missing" && exit 1)
+        grep -q "VITE_FIREBASE_AUTH_DOMAIN" .env.example || (echo "VITE_FIREBASE_AUTH_DOMAIN missing" && exit 1)
+        grep -q "VITE_FIREBASE_PROJECT_ID" .env.example || (echo "VITE_FIREBASE_PROJECT_ID missing" && exit 1)
+        grep -q "VITE_FIREBASE_STORAGE_BUCKET" .env.example || (echo "VITE_FIREBASE_STORAGE_BUCKET missing" && exit 1)
+        echo "✓ All required environment variables documented"
+
+    - name: Check no secrets in git
+      run: |
+        echo "Checking for accidentally committed secrets..."
+        if git ls-files | grep -E "^\.env$"; then
+          echo "ERROR: .env file is tracked in git!"
+          exit 1
+        fi
+        echo "✓ No secrets found in git"
+
   # Code Quality Checks
   quality:
     name: Code Quality
     runs-on: ubuntu-latest
-    
+    needs: validate-env
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '18'
         cache: 'npm'
-    
+
     - name: Install dependencies
       run: npm ci
-    
+
     - name: Run TypeScript type check
       run: npm run type-check
-    
+
     - name: Run ESLint
       run: npm run lint
-    
+
     - name: Check Prettier formatting
       run: npm run format:check
 
@@ -57,31 +93,63 @@ jobs:
       uses: actions/dependency-review-action@v3
       if: github.event_name == 'pull_request'
 
-  # Build and Test
-  build:
-    name: Build and Test
+  # Unit and Integration Tests
+  test:
+    name: Run Tests
     runs-on: ubuntu-latest
     needs: [quality, security]
-    
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run tests
+      run: npm run test:run
+
+    - name: Generate coverage report
+      run: npm run test:coverage
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        files: ./coverage/coverage-final.json
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+  # Build and Test
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    needs: [quality, security, test]
+
     strategy:
       matrix:
         node-version: [18, 20]
-    
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    
+
     - name: Install dependencies
       run: npm ci
-    
+
     - name: Build application
       run: npm run build
-    
+
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       if: matrix.node-version == 18

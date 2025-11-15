@@ -1,4 +1,5 @@
 // Analytics and monitoring utilities
+import { logger } from './logger';
 
 interface AnalyticsEvent {
   name: string;
@@ -66,7 +67,7 @@ class Analytics {
 
   track(eventName: string, properties: Record<string, any> = {}) {
     if (!this.isEnabled) {
-      console.log(`[Analytics] ${eventName}:`, properties);
+      logger.debug(`[Analytics] ${eventName}:`, properties);
       return;
     }
 
@@ -93,9 +94,7 @@ class Analytics {
       // gtag('event', event.name, event.properties);
       
       // For now, just log in development
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[Analytics Event]:', event);
-      }
+      logger.debug('[Analytics Event]:', event);
 
       // Store in localStorage as fallback
       const events = JSON.parse(localStorage.getItem('analytics_events') || '[]');
@@ -202,16 +201,14 @@ class PerformanceMonitor {
       // Send to monitoring service
       this.sendMetric(metric);
     } else {
-      console.log(`[Performance] ${name}: ${value}ms`, metadata);
+      logger.debug(`[Performance] ${name}: ${value}ms`, metadata);
     }
   }
 
   private sendMetric(metric: PerformanceMetric) {
     try {
       // Send to your monitoring service (e.g., DataDog, New Relic, etc.)
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[Performance Metric]:', metric);
-      }
+      logger.debug('[Performance Metric]:', metric);
     } catch (error) {
       console.error('Failed to send performance metric:', error);
     }
@@ -303,9 +300,7 @@ class ErrorTracker {
   private sendError(errorData: any) {
     try {
       // Send to your error tracking service
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[Error Data]:', errorData);
-      }
+      logger.debug('[Error Data]:', errorData);
 
       // Store in localStorage as fallback
       const errors = JSON.parse(localStorage.getItem('error_logs') || '[]');
